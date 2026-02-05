@@ -1,0 +1,1 @@
+# GenZ-Manager AI package

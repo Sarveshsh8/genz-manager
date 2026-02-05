@@ -1,0 +1,110 @@
+================================================================================
+GENZ-MANAGER: EMPLOYEE REVIEW & HIKE ELIGIBILITY PLATFORM
+Product Specification Document
+================================================================================
+
+--------------------------------------------------------------------------------
+1. PRODUCT BREAKDOWN
+--------------------------------------------------------------------------------
+
+1.1 USER ROLES
+--------------
+- EMPLOYEE: Submits self-review (performance, attitude, contribution)
+- MANAGER: Reviews direct reports; optional self-review
+- ADMIN: Manages users, review cycles, config, exports
+
+1.2 CORE USER JOURNEYS
+----------------------
+J1: Employee submits self-review -> Manager reviews employee -> System generates evaluation
+J2: Manager views pending reviews, submits feedback
+J3: Employee views final verdict and feedback
+J4: Admin configures review cycles, exports reports
+
+1.3 MVP vs FUTURE
+-----------------
+MVP:
+- Employee self-review form
+- Manager review form
+- AI evaluation (hike score, verdict, feedback)
+- Display results
+
+FUTURE:
+- Admin dashboard
+- Review cycle management
+- Anonymous peer reviews
+- Team vibe score
+- Promotion simulator
+- Monthly roast-style feedback (opt-in)
+- Exportable HR reports
+
+--------------------------------------------------------------------------------
+2. DATA & SCHEMA DESIGN
+--------------------------------------------------------------------------------
+
+See ai/schemas/ for full Pydantic models.
+
+Key schemas:
+- EmployeeSelfReview
+- ManagerReview
+- FinalEvaluation (hike_score, verdict, serious_feedback, genz_feedback, risk_flags)
+
+--------------------------------------------------------------------------------
+3. PROMPT ENGINEERING
+--------------------------------------------------------------------------------
+
+See ai/prompts/ for full prompts.
+
+Output structure (strict JSON):
+{
+  "hike_score": 0-100,
+  "verdict": "string",
+  "serious_feedback": "string",
+  "genz_feedback": "string",
+  "risk_flags": ["ego", "underperformance", "mismatch", "burnout"]
+}
+
+--------------------------------------------------------------------------------
+4. AI LOGIC
+--------------------------------------------------------------------------------
+
+- Merge: Weighted average (manager 60%, employee 40%) with mismatch penalty
+- Mismatch handling: Large delta triggers "alignment" risk flag
+- Bias normalization: Cap extreme scores, flag outliers
+- Humor: Gen-Z tone in genz_feedback only; serious_feedback stays professional
+
+--------------------------------------------------------------------------------
+5. BACKEND ARCHITECTURE
+--------------------------------------------------------------------------------
+
+FastAPI in ai/ folder. Endpoints:
+- POST /review/employee
+- POST /review/manager
+- POST /evaluate
+
+--------------------------------------------------------------------------------
+6. FRONTEND UX
+--------------------------------------------------------------------------------
+
+Gen-Z style: playful copy, clean layout, feedback cards, result screen.
+See frontend/ for implementation.
+
+--------------------------------------------------------------------------------
+7. ETHICS & SAFETY
+--------------------------------------------------------------------------------
+
+- Human-in-the-loop: All evaluations are suggestions, not decisions
+- Disclaimers: "AI-generated, use as conversation starter"
+- No insults: Prompt enforces professional boundaries
+- Opt-in humor: genz_feedback can be hidden in formal contexts
+
+--------------------------------------------------------------------------------
+8. FUTURE IDEAS
+--------------------------------------------------------------------------------
+
+- Anonymous peer reviews
+- Team vibe score
+- Promotion simulator
+- Monthly roast-style feedback (safe, opt-in)
+- Exportable HR reports
+
+================================================================================
