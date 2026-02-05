@@ -2,26 +2,32 @@
 
 import { useState } from "react";
 
-const SKILL_LABELS: Record<string, string> = {
-  communication: "Communication",
-  teamwork: "Teamwork",
-  leadership: "Leadership",
-  adaptability: "Adaptability",
-  problem_solving: "Problem solving",
-  technical_competence: "Technical competence",
-  delivery_quality: "Delivery quality",
-  productivity: "Productivity",
-  initiative: "Initiative",
-  collaboration: "Collaboration",
-  receptiveness_to_feedback: "Receptiveness to feedback",
-  work_ethic: "Work ethic",
-  attitude: "Attitude",
-};
+const EMOJI_SCALE = [
+  { value: 1, emoji: "\uD83D\uDC80", label: "yikes" },
+  { value: 2, emoji: "\uD83D\uDE2C", label: "eh" },
+  { value: 3, emoji: "\uD83D\uDE10", label: "mid" },
+  { value: 4, emoji: "\uD83D\uDD25", label: "fire" },
+  { value: 5, emoji: "\uD83D\uDE80", label: "slay" },
+];
+
+const SKILLS = [
+  { key: "communication", label: "Communication", group: "soft" },
+  { key: "teamwork", label: "Teamwork", group: "soft" },
+  { key: "leadership", label: "Leadership", group: "soft" },
+  { key: "adaptability", label: "Adaptability", group: "soft" },
+  { key: "problem_solving", label: "Problem solving", group: "soft" },
+  { key: "technical_competence", label: "Technical skill", group: "hard" },
+  { key: "delivery_quality", label: "Delivery quality", group: "hard" },
+  { key: "productivity", label: "Productivity", group: "hard" },
+  { key: "initiative", label: "Initiative", group: "hard" },
+  { key: "collaboration", label: "Collaboration", group: "culture" },
+  { key: "receptiveness_to_feedback", label: "Feedback reception", group: "culture" },
+  { key: "work_ethic", label: "Work ethic", group: "culture" },
+  { key: "attitude", label: "Attitude / vibes", group: "culture" },
+];
 
 const defaultScores: Record<string, number> = {};
-Object.keys(SKILL_LABELS).forEach((k) => {
-  defaultScores[k] = 3;
-});
+SKILLS.forEach((s) => { defaultScores[s.key] = 3; });
 
 export function ManagerForm({
   onSubmit,
@@ -34,7 +40,7 @@ export function ManagerForm({
   error: string | null;
   employeeName?: string;
 }) {
-  const [scores, setScores] = useState<Record<string, number>>(defaultScores);
+  const [scores, setScores] = useState<Record<string, number>>({ ...defaultScores });
   const [managerName, setManagerName] = useState("");
   const [managerId, setManagerId] = useState("");
   const [summary, setSummary] = useState("");
@@ -43,9 +49,9 @@ export function ManagerForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const soft = ["communication", "teamwork", "leadership", "adaptability", "problem_solving"];
-    const hard = ["technical_competence", "delivery_quality", "productivity", "initiative"];
-    const culture = ["collaboration", "receptiveness_to_feedback", "work_ethic", "attitude"];
+    const soft = SKILLS.filter((s) => s.group === "soft").map((s) => s.key);
+    const hard = SKILLS.filter((s) => s.group === "hard").map((s) => s.key);
+    const culture = SKILLS.filter((s) => s.group === "culture").map((s) => s.key);
     onSubmit({
       manager_id: managerId || "mgr-1",
       manager_name: managerName || "Manager",
@@ -62,61 +68,72 @@ export function ManagerForm({
     });
   };
 
+  const groups = [
+    { id: "soft", title: "SOFT SKILLS" },
+    { id: "hard", title: "HARD SKILLS" },
+    { id: "culture", title: "CULTURE & VIBES" },
+  ];
+
   return (
-    <form className="form" onSubmit={handleSubmit}>
-      <h2>Manager review</h2>
-      <p className="form-hint">
-        Reviewing {employeeName || "your report"}. Your ratings will be compared with their self-review. Be real.
+    <form className="glass-card" onSubmit={handleSubmit}>
+      <h2 className="form-title">Manager review</h2>
+      <p className="form-subtitle">
+        Reviewing <strong>{employeeName || "your report"}</strong>. Be honest.
+        Your ratings will be compared with their self-review. No pressure.
       </p>
 
-      <div className="field">
-        <label>Your name (manager)</label>
-        <input value={managerName} onChange={(e) => setManagerName(e.target.value)} placeholder="Jordan" />
-      </div>
-      <div className="field">
-        <label>Manager ID</label>
-        <input value={managerId} onChange={(e) => setManagerId(e.target.value)} placeholder="mgr-001" />
-      </div>
-
-      <fieldset className="skills">
-        <legend>Rate them (1 = needs work, 5 = absolutely crushing it)</legend>
-        {Object.entries(SKILL_LABELS).map(([key, label]) => (
-          <div key={key} className="skill-row">
-            <label>{label}</label>
-            <select
-              value={scores[key]}
-              onChange={(e) => setScores((s) => ({ ...s, [key]: Number(e.target.value) }))}
-            >
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>{n}</option>
-              ))}
-            </select>
-          </div>
-        ))}
-      </fieldset>
-
-      <div className="field">
-        <label>Manager summary</label>
-        <textarea
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
-          placeholder="Overall take. Be constructive."
-          rows={3}
-        />
-      </div>
-      <div className="field">
-        <label>Strengths</label>
-        <textarea value={strengths} onChange={(e) => setStrengths(e.target.value)} placeholder="Where do they shine?" rows={2} />
-      </div>
-      <div className="field">
-        <label>Improvement areas</label>
-        <textarea value={improvement} onChange={(e) => setImprovement(e.target.value)} placeholder="What could be better?" rows={2} />
+      <div style={{ display: "flex", gap: "0.75rem" }}>
+        <div className="field" style={{ flex: 1 }}>
+          <label className="field-label">Your name</label>
+          <input className="field-input" value={managerName} onChange={(e) => setManagerName(e.target.value)} placeholder="Boss name" />
+        </div>
+        <div className="field" style={{ flex: 1 }}>
+          <label className="field-label">Manager ID</label>
+          <input className="field-input" value={managerId} onChange={(e) => setManagerId(e.target.value)} placeholder="mgr-001" />
+        </div>
       </div>
 
-      {error && <p className="error">{error}</p>}
+      {groups.map((g) => (
+        <div key={g.id} className="emoji-section">
+          <div className="emoji-section-title">{g.title}</div>
+          {SKILLS.filter((s) => s.group === g.id).map((skill) => (
+            <div key={skill.key} className="emoji-row">
+              <span className="emoji-row-label">{skill.label}</span>
+              <div className="emoji-btns">
+                {EMOJI_SCALE.map((e) => (
+                  <button
+                    key={e.value}
+                    type="button"
+                    className={`emoji-btn ${scores[skill.key] === e.value ? "selected" : ""}`}
+                    onClick={() => setScores((s) => ({ ...s, [skill.key]: e.value }))}
+                    title={e.label}
+                  >
+                    {e.emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
 
-      <button type="submit" className="btn btn-primary" disabled={loading}>
-        {loading ? "Reading the room..." : "Get verdict"}
+      <div className="field">
+        <label className="field-label">Manager summary</label>
+        <textarea className="field-input" value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="Overall take. Be constructive." rows={3} />
+      </div>
+      <div className="field">
+        <label className="field-label">Strengths</label>
+        <textarea className="field-input" value={strengths} onChange={(e) => setStrengths(e.target.value)} placeholder="Where do they shine?" rows={2} />
+      </div>
+      <div className="field">
+        <label className="field-label">Improvement areas</label>
+        <textarea className="field-input" value={improvement} onChange={(e) => setImprovement(e.target.value)} placeholder="What needs leveling up?" rows={2} />
+      </div>
+
+      {error && <p className="error-msg">{error}</p>}
+
+      <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+        {loading ? "Reading the room..." : "Get the verdict"}
       </button>
     </form>
   );

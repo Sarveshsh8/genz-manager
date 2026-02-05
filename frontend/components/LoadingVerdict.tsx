@@ -2,30 +2,38 @@
 
 import { useState, useEffect } from "react";
 
-const LOADING_PHRASES = [
-  "Consulting the oracle...",
-  "Reading between the lines...",
-  "Doing the math (it is not math)...",
+const PHRASES = [
+  "Consulting the algorithm...",
   "Vibes are being analyzed...",
-  "Almost there, no cap...",
   "Generating your character arc...",
+  "Cross-referencing the delusion...",
+  "The AI is reading the room...",
+  "Calculating hike worthiness...",
+  "Running reality check protocol...",
+  "Almost done, no cap...",
 ];
 
 export function LoadingVerdict() {
-  const [phrase, setPhrase] = useState(LOADING_PHRASES[0]);
+  const [phrase, setPhrase] = useState(PHRASES[0]);
+  const [idx, setIdx] = useState(0);
+
   useEffect(() => {
-    setPhrase(LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)]);
+    setPhrase(PHRASES[Math.floor(Math.random() * PHRASES.length)]);
+    const interval = setInterval(() => {
+      setIdx((prev) => {
+        const next = (prev + 1) % PHRASES.length;
+        setPhrase(PHRASES[next]);
+        return next;
+      });
+    }, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="result">
-      <div className="loading-verdict">
-        <p className="loading-phrase">{phrase}</p>
-        <div className="loading-dots">
-          <span />
-          <span />
-          <span />
-        </div>
+    <div className="glass-card">
+      <div className="loading-screen">
+        <div className="loading-spinner" />
+        <p className="loading-text">{phrase}</p>
         <p className="loading-sub">Comparing self-review vs manager review...</p>
       </div>
     </div>
